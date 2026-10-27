@@ -17,16 +17,26 @@ public class AiController {
     }
 
 //    @PostMapping("/chat")
-@PostMapping("/recommend")
-public ApiResponse<String> recommend(@RequestBody Map<String, String> request) {
-    // 注意这里必须是 "question"，和你 Postman 里发的一致
-    String question = request.get("question");
+    @PostMapping("/recommend")
+    public ApiResponse<String> recommend(@RequestBody Map<String, String> request) {
+        // 注意这里必须是 "question"，和你 Postman 里发的一致
+        String question = request.get("question");
 
-    if (question == null || question.isBlank()) {
-        return ApiResponse.error(400, "question 不能为空");
+        if (question == null || question.isBlank()) {
+            return ApiResponse.error(400, "question 不能为空");
+        }
+
+        String reply = aiService.recommend(question);
+        return ApiResponse.success(reply);
     }
 
-    String reply = aiService.recommend(question);
-    return ApiResponse.success(reply);
-}
+    @PostMapping("/agent")
+    public ApiResponse<String> agent(@RequestBody Map<String, String> request) {
+        String message = request.get("message");
+        if (message == null || message.isBlank()) {
+            return ApiResponse.error(400, "message 不能为空");
+        }
+        String reply = aiService.chatWithTools(message);
+        return ApiResponse.success(reply);
+    }
 }
