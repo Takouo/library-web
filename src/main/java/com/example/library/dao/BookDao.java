@@ -6,6 +6,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Repository
@@ -63,9 +64,30 @@ public class BookDao {
     }
 
     public List<Book> searchByKeyword(String keyword) {
-        String sql = "SELECT * FROM books WHERE title LIKE ? OR author LIKE ?";
-        String pattern = "%" + keyword + "%";
-        return jdbcTemplate.query(sql, rowMapper, pattern, pattern);
+        if (keyword == null || keyword.isBlank()) {
+            return new ArrayList<>();
+        }
+
+        // 把关键词按空格拆开
+        String[] words = keyword.trim().split("\\s+");
+
+        // 动态拼接 SQL
+        StringBuilder sql = new StringBuilder("SELECT * FROM books WHERE ");
+        for (int i = 0; i < words.length; i++) {
+            if (i > 0) sql.append(" OR ");
+            // 对书名或作者进行模糊匹配
+            sql.append("(title LIKE ? OR author LIKE ?)");
+        }
+
+        // 构造参数列表
+        List<Object> params = new ArrayList<>();
+        for (String word : words) {
+            String pattern = "%" + word + "%";
+            params.add(pattern);
+            params.add(pattern);
+        }
+
+        return jdbcTemplate.query(sql.toString(), rowMapper, params.toArray());
     }
 
     public List<Book> findByAuthor(String author) {
