@@ -1,0 +1,2 @@
+spring.datasource.password=你的数据库密码
+spring.ai.zhipuai.api-key=你的智谱APIKey
